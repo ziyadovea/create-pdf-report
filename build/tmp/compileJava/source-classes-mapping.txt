@@ -2,7 +2,7 @@ com/aam/pdf/springboot/Application.java
  com.aam.pdf.springboot.Application
 testIText7.java
  testIText7
-Report.java
- Report
-PdfReport.java
- PdfReport
+com/aam/pdf/springboot/report/Report.java
+ com.aam.pdf.springboot.report.Report
+com/aam/pdf/springboot/pdfreport/PdfReport.java
+ com.aam.pdf.springboot.pdfreport.PdfReport

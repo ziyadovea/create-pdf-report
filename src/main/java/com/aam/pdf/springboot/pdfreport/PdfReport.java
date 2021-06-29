@@ -8,7 +8,9 @@ import com.itextpdf.kernel.geom.PageSize;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.AreaBreak;
 import com.itextpdf.layout.element.Table;
+import com.itextpdf.layout.property.AreaBreakType;
 import com.itextpdf.layout.property.HorizontalAlignment;
 
 import java.io.File;
@@ -30,6 +32,7 @@ public class PdfReport implements Report {
         File file = new File(fileName);
         PdfWriter pdfWriter = new PdfWriter(file);
         PdfDocument pdfDocument = new PdfDocument(pdfWriter);
+        pdfDocument.addNewPage();
         this.document = new Document(pdfDocument, PageSize.A4);
         this.document.setFont(font);
     }
@@ -40,23 +43,33 @@ public class PdfReport implements Report {
 
     @Override
     public void createReport(List<String> header, List<String> batch) {
-        // Set base properties for table
-        Table table = new Table(Math.min(5, header.size()));
-        table.setMarginLeft(-10);
-        table.setMarginRight(-10);
-        table.setHorizontalAlignment(HorizontalAlignment.CENTER);
-        table.setWidth(540);
-        table.setAutoLayout();
-        table.setFont(font).setFontSize(10);
+        if (header.size() > 0) {
+            // Set base properties for table
+            this.table = new Table(Math.min(5, header.size()));
+            this.table.setMarginLeft(-10)
+                      .setMarginRight(-10)
+                      .setHorizontalAlignment(HorizontalAlignment.CENTER)
+                      .setWidth(540)
+                      .setAutoLayout()
+                      .setFont(font)
+                      .setFontSize(10);
+        }
     }
 
     @Override
     public void nextBatch(List<String> batch) {
+        if (batch.size() > 0 && this.table != null) {
 
+        }
     }
 
     @Override
     public void getReport() {
-        document.add(table);
+        if (this.table != null) {
+            this.document.add(this.table);
+        }
+        this.document.close();
     }
+
+
 }
