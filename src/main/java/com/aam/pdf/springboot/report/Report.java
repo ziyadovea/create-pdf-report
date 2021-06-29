@@ -1,3 +1,5 @@
+package com.aam.pdf.springboot.report;
+
 import java.util.List;
 
 public interface Report {

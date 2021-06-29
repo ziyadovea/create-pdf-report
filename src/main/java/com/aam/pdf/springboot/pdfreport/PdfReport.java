@@ -1,3 +1,6 @@
+package com.aam.pdf.springboot.pdfreport;
+
+import com.aam.pdf.springboot.report.Report;
 import com.itextpdf.io.font.PdfEncodings;
 import com.itextpdf.kernel.font.PdfFont;
 import com.itextpdf.kernel.font.PdfFontFactory;
