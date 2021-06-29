@@ -1,5 +1,7 @@
+import java.util.List;
+
 public interface Report {
-    void createReport(String header, String[][] batch);
-    void nextBatch(String[][] batch);
+    void createReport(List<String> header, List<String> batch);
+    void nextBatch(List<String> batch);
     void getReport();
 }

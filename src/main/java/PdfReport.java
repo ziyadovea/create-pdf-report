@@ -11,6 +11,7 @@ import com.itextpdf.layout.property.HorizontalAlignment;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.List;
 
 public class PdfReport implements Report {
 
@@ -35,9 +36,9 @@ public class PdfReport implements Report {
     }
 
     @Override
-    public void createReport(String header, String[][] batch) {
+    public void createReport(List<String> header, List<String> batch) {
         // Set base properties for table
-        Table table = new Table(batch[0].length);
+        Table table = new Table(Math.min(5, header.size()));
         table.setMarginLeft(-10);
         table.setMarginRight(-10);
         table.setHorizontalAlignment(HorizontalAlignment.CENTER);
@@ -47,7 +48,7 @@ public class PdfReport implements Report {
     }
 
     @Override
-    public void nextBatch(String[][] batch) {
+    public void nextBatch(List<String> batch) {
 
     }
 
