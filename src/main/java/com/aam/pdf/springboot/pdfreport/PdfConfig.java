@@ -7,6 +7,9 @@ import com.itextpdf.kernel.geom.PageSize;
 
 import java.io.IOException;
 
+/**
+ * Класс, который задает конфигурацию для pdf файла
+ */
 public class PdfConfig {
 
     private final String FONT_FILENAME = "ARIALUNI.TTF";
@@ -17,6 +20,7 @@ public class PdfConfig {
     private PdfFont font;
     private Orientation orientation;
     private String header;
+    private float fontSize;
     private boolean headerOnEachPage;
     private boolean pageNumeration;
 
@@ -27,6 +31,7 @@ public class PdfConfig {
         this.pageSize = PageSize.A4;
         this.orientation = Orientation.PORTRAIT;
         this.header = null;
+        this.fontSize = 10f;
         this.headerOnEachPage = false;
         this.pageNumeration = true;
         try {
@@ -87,6 +92,15 @@ public class PdfConfig {
 
     public PdfConfig setHeader(String header) {
         this.header = header;
+        return this;
+    }
+
+    public float getFontSize() {
+        return fontSize;
+    }
+
+    public PdfConfig setFontSize(float fontSize) {
+        this.fontSize = fontSize;
         return this;
     }
 

@@ -8,8 +8,10 @@ import com.itextpdf.kernel.events.Event;
 import com.itextpdf.kernel.events.PdfDocumentEvent;
 import com.itextpdf.kernel.font.PdfFont;
 import com.itextpdf.kernel.font.PdfFontFactory;
+import com.itextpdf.kernel.geom.PageSize;
 import com.itextpdf.kernel.geom.Rectangle;
 import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfString;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Canvas;
 import com.itextpdf.layout.Document;
@@ -28,6 +30,9 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Locale;
+
+import static com.itextpdf.kernel.pdf.PdfName.BaseFont;
 
 public class testIText7 {
 
@@ -45,7 +50,7 @@ public class testIText7 {
         PdfDocument pdfDocument = new PdfDocument(pdfWriter);
 
         // Create document to add new elements
-        Document document = new Document(pdfDocument);
+        Document document = new Document(pdfDocument, PageSize.A4);
         /*document.setProperty(Property.SPLIT_CHARACTERS,
                 new DefaultSplitCharacters() {
                     @Override
@@ -142,10 +147,6 @@ public class testIText7 {
 
         document.add(table);
 
-        Hyphenator h = new Hyphenator("ru", "RU", 2, 2);
-        Hyphenation hh = h.hyphenate("интеллегенция");
-        System.out.println(hh);
-
         // Test large table
 
         // Add new page to document
@@ -158,11 +159,14 @@ public class testIText7 {
                 "для Yahoo! и Facebook[3]. Разработан на Java в рамках вычислительной парадигмы " +
                 "MapReduce, согласно которой приложение разделяется на большое количество одинаковых " +
                 "элементарных заданий, выполнимых на узлах кластера и естественным образом сводимых в конечный результат.";
-        str = "aaaaaaaaaaaaaaaaaaaa";
-        Table largeTable = createTable(5, str+str+str+str, font);
-        System.out.println((str+str+str+str+str).length());
+        str = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+        str = "verylongwordverylongwordverylongwordverylongwordverylongwordverylongwordverylongwordverylongwordverylongwordverylongword";
+        System.out.printf("\n\nstr size in pixeles: %f\n", font.getWidth(str, 10));
+        System.out.printf("string length: %d\n", str.length());
+        System.out.printf("page size: width X height: %f, %f\n", PageSize.A5.getWidth(), PageSize.A5.getHeight());
+        System.out.printf("font size: %f\n\n", 10f);
+        Table largeTable = createTable(5, str, font);
         document.add(largeTable);
-
         // Close document
         document.close();
 
@@ -174,9 +178,9 @@ public class testIText7 {
         table.setMarginLeft(-10);
         table.setMarginRight(-10);
         table.setHorizontalAlignment(HorizontalAlignment.CENTER);
-        table.setWidth(540);
-        table.setMaxWidth(540);
-        table.setAutoLayout();
+        table.setWidth(PageSize.A4.getWidth() - 55f);
+        table.setFixedLayout();
+        //table.setAutoLayout();
         table.setFont(font).setFontSize(10);
         table.addHeaderCell(new Cell().add(new Paragraph("1")).setBackgroundColor(ColorConstants.LIGHT_GRAY));
         table.addHeaderCell(new Cell().add(new Paragraph("2")).setBackgroundColor(ColorConstants.LIGHT_GRAY));
