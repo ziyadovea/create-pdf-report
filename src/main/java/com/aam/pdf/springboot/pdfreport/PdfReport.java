@@ -68,6 +68,10 @@ public class PdfReport implements Report {
         }
         // Заносим заголовки и первый пакет данных в соответствующие переменные класса
         this.headers = new ArrayList<String>(headers);
+        // Проверяем, задана ли колонка с нумерацией
+        if (this.config.isNumbersColumn()) {
+            this.headers.add(0, "№");
+        }
         this.columnCount = this.headers.size();
         this.data = new ArrayList<ArrayList<String>>();
         if (this.columnCount > 0 && batch.size() > 0) {
@@ -107,12 +111,6 @@ public class PdfReport implements Report {
         PdfWriter pdfWriter = new PdfWriter(file);
         PdfDocument pdfDocument = new PdfDocument(pdfWriter);
 
-        // Если не установлен автоматический подбор размера  страницы
-        // под таблицу, то учитываем заданный размер и ориентацию
-        if (!config.isAutoPageSize()) {
-            this.calculatePageSize();
-        }
-
         this.document = new Document(pdfDocument, config.getPageSize());
         this.document.setFont(config.getFont());
 
@@ -132,20 +130,13 @@ public class PdfReport implements Report {
      * если не установлен автоматической подбор размеры страницы
      */
     private void calculatePageSize() {
-        // Ширина меньше высоты и портреная ориентация - все верно
-        if (config.getPageSize().getWidth() < config.getPageSize().getHeight()
-                && config.getOrientation() == Orientation.PORTRAIT) {
-            config.setPageSize(config.getPageSize());
         // Ширина меньше высоты и альбомная ориентация - надо перевернуть
-        } else if (config.getPageSize().getWidth() < config.getPageSize().getHeight()
+        if (config.getPageSize().getWidth() < config.getPageSize().getHeight()
                 && config.getOrientation() == Orientation.LANDSCAPE) {
             config.setPageSize(config.getPageSize().rotate());
-        // Ширина больше высоты и альбомная ориентация - все верно
-        } else if (config.getPageSize().getWidth() > config.getPageSize().getHeight()
-                && config.getOrientation() == Orientation.LANDSCAPE) {
-            config.setPageSize(config.getPageSize());
         // Ширина больше высоты и портерная ориентация - надо перевернуть
-        } else {
+        } else if (config.getPageSize().getWidth() > config.getPageSize().getHeight()
+                && config.getOrientation() == Orientation.PORTRAIT) {
             config.setPageSize(config.getPageSize().rotate());
         }
     }
@@ -224,15 +215,18 @@ public class PdfReport implements Report {
      */
     @Override
     public void getReport() throws FileNotFoundException {
-        // Создаем документ
-        this.createDocument();
-        // Добавляем таблицы в него
         if (this.columnCount > 0) {
+            // Создаем таблицы
             ArrayList<Table> tableArr = this.createTable();
+            // Создаем документ
+            this.createDocument();
+            // Добавляем таблицы в документ
             for (Table table : tableArr) {
                 this.document.add(table);
                 this.document.add(new Paragraph("").setFontSize(10));
             }
+        } else {
+            this.createDocument();
         }
         // Закрываем документ
         this.document.close();
@@ -253,6 +247,9 @@ public class PdfReport implements Report {
         this.largeCell = new ArrayList<>(this.columnCount);
         float tableWidth = this.config.getPageSize().getWidth() - 55f;
 
+        // Учитываем заданный размер и ориентацию
+        this.calculatePageSize();
+
         // Если не задан автоматический подбор ширины страницы
         if (!this.config.isAutoPageSize()) {
             // Найдем количество таблиц и количество колонок в них
@@ -260,7 +257,9 @@ public class PdfReport implements Report {
         } else {
             // Подсчитаем необходимый размер страницы для того,
             // чтобы вся таблица вместилась без переноса
-
+            tableWidth = this.calculateTableWidth(longestWords);
+            // Устанавливаем необходимый размер страницы
+            config.setPageSize(new PageSize(tableWidth + 50, this.config.getPageSize().getHeight()));
         }
 
         // Теперь создадим непосредственно таблицы
@@ -281,6 +280,21 @@ public class PdfReport implements Report {
         this.addDataToTables(result);
 
         return result;
+    }
+
+    /**
+     * Метод, который рассчитвает необходимую ширину таблицы
+     */
+    private float calculateTableWidth(ArrayList<String> longestWords) {
+        this.colsInTable.put(this.tableCount, this.columnCount);
+        float currWidth = 0f;
+        // Проходим по всем самым длинным словам из каждой колонки
+        for (int i = 0; i < longestWords.size(); i++) {
+            // Считаем текущую ширину, которые занимали бы самые длинные слова
+            // Первое + 2 - чтобы учитывались также заголовки, второе + 6 - для ширины граней
+            currWidth += this.config.getFont().getWidth(longestWords.get(i), this.config.getFontSize() + 2) + 6;
+        }
+        return currWidth;
     }
 
     // Смысл метода: в библиотеке iText7 нет автоматического переноса, если таблица не вмещается по ширине,
@@ -351,7 +365,9 @@ public class PdfReport implements Report {
                                 .setFontSize(this.config.getFontSize() + 2));
             }
             // Цикл по строкам данных для таблицы
+            int counter = -1;
             for (ArrayList<String> row : this.data) {
+                counter++;
                 for (int k = 0; k < colsInTable.get(i + 1); k++) {
                     result.get(i).addCell(row.get(k + shift));
                 }
