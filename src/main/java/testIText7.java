@@ -34,6 +34,9 @@ import java.util.Locale;
 
 import static com.itextpdf.kernel.pdf.PdfName.BaseFont;
 
+/**
+ * Первая работа с библиотекой
+ */
 public class testIText7 {
 
     protected String string = "this is a header";

@@ -42,6 +42,10 @@ public class PdfReport implements Report {
     private ArrayList<ArrayList<String>> data;
     private PdfConfig config;
 
+    private int tableCount;
+    private Map<Integer, Integer> colsInTable;
+    private ArrayList<Integer> largeCell;
+
     /**
      * Конструктор класса
      * @param config - задает конфигурацию pdf файла
@@ -58,14 +62,11 @@ public class PdfReport implements Report {
      */
     @Override
     public void createReport(ArrayList<String> headers, ArrayList<ArrayList<String>> batch) throws FileNotFoundException {
-        // Создаем документ для отчета
-        this.createDocument();
-
-        // Тут начинается работа непосредственно с данными для отчета
-        // Проверка, что параметры не null, иначе - исключение
+        // Проверка параметров на null
         if (headers == null || batch == null) {
             throw new NullPointerException();
         }
+        // Заносим заголовки и первый пакет данных в соответствующие переменные класса
         this.headers = new ArrayList<String>(headers);
         this.columnCount = this.headers.size();
         this.data = new ArrayList<ArrayList<String>>();
@@ -106,7 +107,31 @@ public class PdfReport implements Report {
         PdfWriter pdfWriter = new PdfWriter(file);
         PdfDocument pdfDocument = new PdfDocument(pdfWriter);
 
-        // Определяем размер страницы
+        // Если не установлен автоматический подбор размера  страницы
+        // под таблицу, то учитываем заданный размер и ориентацию
+        if (!config.isAutoPageSize()) {
+            this.calculatePageSize();
+        }
+
+        this.document = new Document(pdfDocument, config.getPageSize());
+        this.document.setFont(config.getFont());
+
+        // Устанавливаем заголовки и/или нумерацию
+        this.addHeaderAndNumbering(pdfDocument);
+
+        // Проверка, задан ли язык для корректного переноса слов
+        if (config.getLang() != null) {
+            this.document.setHyphenation(
+                    new HyphenationConfig(config.getLang(), config.getLang().toUpperCase(), 2, 2)
+            );
+        }
+    }
+
+    /**
+     * Метод, который определяет размер страницы при заданной ориентации,
+     * если не установлен автоматической подбор размеры страницы
+     */
+    private void calculatePageSize() {
         // Ширина меньше высоты и портреная ориентация - все верно
         if (config.getPageSize().getWidth() < config.getPageSize().getHeight()
                 && config.getOrientation() == Orientation.PORTRAIT) {
@@ -123,9 +148,12 @@ public class PdfReport implements Report {
         } else {
             config.setPageSize(config.getPageSize().rotate());
         }
+    }
 
-        this.document = new Document(pdfDocument, config.getPageSize());
-        this.document.setFont(config.getFont());
+    /**
+     * Метод, который устанавливает заголовок и/или нумерацию страниц
+     */
+    private void addHeaderAndNumbering(PdfDocument pdfDocument) {
 
         boolean isHeader = false;
         // Проверка, есть ли у документа заголовк
@@ -149,13 +177,16 @@ public class PdfReport implements Report {
             } else {
                 isHeader = true;
             }
-        // Проверка, есть ли у документа нумерация
+            // Проверка, есть ли у документа нумерация
         } else if (config.isPageNumeration()) {
             pdfDocument.addEventHandler(PdfDocumentEvent.END_PAGE,
                     new HeaderAndNumberingEventHandler(this.document, true, this.config));
         }
 
         pdfDocument.addNewPage();
+
+        // Отдельно случай, когда заголовок только на 1 странице
+        // Не нужно переопределять событие - добавляем 1 раз вручную и все
         if (isHeader) {
             float coordX = ((config.getPageSize().getLeft() + document.getLeftMargin())
                     + (config.getPageSize().getRight() - document.getRightMargin())) / 2;
@@ -170,12 +201,6 @@ public class PdfReport implements Report {
             canvas.close();
         }
 
-        // Проверка, задан ли язык для корректного переноса слов
-        if (config.getLang() != null) {
-            this.document.setHyphenation(
-                    new HyphenationConfig(config.getLang(), config.getLang().toUpperCase(), 2, 2)
-            );
-        }
     }
 
     /**
@@ -198,7 +223,10 @@ public class PdfReport implements Report {
      * Метод, который окончательно формуирет отчет и отдает пользователю
      */
     @Override
-    public void getReport() {
+    public void getReport() throws FileNotFoundException {
+        // Создаем документ
+        this.createDocument();
+        // Добавляем таблицы в него
         if (this.columnCount > 0) {
             ArrayList<Table> tableArr = this.createTable();
             for (Table table : tableArr) {
@@ -206,6 +234,7 @@ public class PdfReport implements Report {
                 this.document.add(new Paragraph("").setFontSize(10));
             }
         }
+        // Закрываем документ
         this.document.close();
     }
 
@@ -214,46 +243,26 @@ public class PdfReport implements Report {
      * @return - таблица для отчета
      */
     private ArrayList<Table> createTable() {
-        // Находим размеры страницы
-        float pageWidth = this.config.getPageSize().getWidth();
-        float pageHeight = this.config.getPageSize().getHeight();
-        // Находим размер шрифта
-        float fontSize = this.config.getFontSize();
-        // Задаем ширину для таблицы
-        float tableWidth = pageWidth - 55f;
-        // Для того, что определиться с числом колонок - найдем максимально длинное слово
+
+        // Для того, что определиться с числом колонок (или шириной листа) - найдем максимально длинное слово
         // в каждой колонке
         ArrayList<String> longestWords = this.longestWordEachColumn();
-        // Теперь, учитывая размеры шрифта и страницы, определяем число таблиц и число колонок в них
-        float currWidth = 0f;
-        int tableCount = 1;
-        Map<Integer, Integer> colsInTable = new HashMap<>();
-        int counter = 0;
-        ArrayList<Integer> largeCell = new ArrayList<Integer>(this.columnCount);
-        // Проходим по всем самым длинным словам из каждой колонки
-        for (int i = 0; i < longestWords.size(); i++) {
-            // Счетчик для числа колонок в каждой таблице
-            counter++;
-            // Считаем текущую ширину, которые занимали бы самые длинные слова
-            // Первое + 2 - чтобы учитывались также заголовки, второе + 6 - для ширины грани
-            currWidth += config.getFont().getWidth(longestWords.get(i), config.getFontSize() + 2) + 6;
-            // Если слова уже не помещаются в таблицу
-            if (currWidth >= tableWidth) {
-                // Указываем число колонок в текущей таблице
-                boolean oneLargeCell = counter == 1;
-                colsInTable.put(tableCount, oneLargeCell ? counter : --counter);
-                // Надо откатиться на 1 итерацию назад, если это не была одна большая ячейка
-                if (!oneLargeCell) i -= 1; else largeCell.add(i);
-                // Добавляем еще одну таблицу
-                tableCount++;
-                // Обнуляем текущую ширину и счетчик
-                currWidth = 0f;
-                counter = 0;
-            }
+
+        this.tableCount = 1;
+        this.colsInTable = new HashMap<>();
+        this.largeCell = new ArrayList<>(this.columnCount);
+        float tableWidth = this.config.getPageSize().getWidth() - 55f;
+
+        // Если не задан автоматический подбор ширины страницы
+        if (!this.config.isAutoPageSize()) {
+            // Найдем количество таблиц и количество колонок в них
+            this.calculateNumberTablesAndColumns(longestWords);
+        } else {
+            // Подсчитаем необходимый размер страницы для того,
+            // чтобы вся таблица вместилась без переноса
+
         }
-        if (counter != 0) {
-            colsInTable.put(tableCount, counter);
-        }
+
         // Теперь создадим непосредственно таблицы
         ArrayList<Table> result = new ArrayList<>(tableCount);
         for (int i = 0; i < tableCount; i++) {
@@ -267,7 +276,61 @@ public class PdfReport implements Report {
                     .setFont(this.config.getFont()).setFontSize(this.config.getFontSize())
             );
         }
+
         // Добавляем в таблицы данные
+        this.addDataToTables(result);
+
+        return result;
+    }
+
+    // Смысл метода: в библиотеке iText7 нет автоматического переноса, если таблица не вмещается по ширине,
+    // поэтому невмещающиеся колонки строим в других таблицах
+    /**
+     * Метод, который считает по размеру страницы, по размеру шрифта
+     * и по самым длинным словам в колонкам число таблиц и колонок
+     * @param longestWords - массив саммых длинных слов в каждой колонке
+     */
+    private void calculateNumberTablesAndColumns(ArrayList<String> longestWords) {
+        // Находим размеры страницы
+        float pageWidth = this.config.getPageSize().getWidth();
+        float pageHeight = this.config.getPageSize().getHeight();
+        // Находим размер шрифта
+        float fontSize = this.config.getFontSize();
+        // Задаем ширину для таблицы
+        float tableWidth = pageWidth - 55f;
+        // Учитывая размеры шрифта и страницы, определяем число таблиц и число колонок в них
+        float currWidth = 0f;
+        int counter = 0;
+        // Проходим по всем самым длинным словам из каждой колонки
+        for (int i = 0; i < longestWords.size(); i++) {
+            // Счетчик для числа колонок в каждой таблице
+            counter++;
+            // Считаем текущую ширину, которые занимали бы самые длинные слова
+            // Первое + 2 - чтобы учитывались также заголовки, второе + 6 - для ширины граней
+            currWidth += this.config.getFont().getWidth(longestWords.get(i), this.config.getFontSize() + 2) + 6;
+            // Если слова уже не помещаются в таблицу
+            if (currWidth >= tableWidth) {
+                // Указываем число колонок в текущей таблице
+                boolean oneLargeCell = counter == 1;
+                this.colsInTable.put(this.tableCount, oneLargeCell ? counter : --counter);
+                // Надо откатиться на 1 итерацию назад, если это не была одна большая ячейка
+                if (!oneLargeCell) i -= 1; else this.largeCell.add(i);
+                // Добавляем еще одну таблицу
+                this.tableCount++;
+                // Обнуляем текущую ширину и счетчик
+                currWidth = 0f;
+                counter = 0;
+            }
+        }
+        if (counter != 0) {
+            this.colsInTable.put(this.tableCount, counter);
+        }
+    }
+
+    /**
+     * Метод, который создает добавляет в таблицы данные
+     */
+    private void addDataToTables(ArrayList<Table> result) {
         // Цикл по таблицам
         int shift = 0; // Переменная, которая хранит в себе сдвиг данных для таблиц после 1-ой
         for (int i = 0; i < tableCount; i++) {
@@ -294,7 +357,6 @@ public class PdfReport implements Report {
                 }
             }
         }
-        return result;
     }
 
     /**

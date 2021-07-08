@@ -7,5 +7,5 @@ import java.util.List;
 public interface Report {
     void createReport(ArrayList<String> headers, ArrayList<ArrayList<String>> batch) throws FileNotFoundException;
     void addBatch(ArrayList<ArrayList<String>> batch);
-    void getReport();
+    void getReport() throws FileNotFoundException;
 }

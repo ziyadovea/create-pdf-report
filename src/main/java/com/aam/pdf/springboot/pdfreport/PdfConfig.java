@@ -23,6 +23,8 @@ public class PdfConfig {
     private float fontSize;
     private boolean headerOnEachPage;
     private boolean pageNumeration;
+    private boolean numbersColumn;
+    private boolean autoPageSize;
 
     public PdfConfig() {
         // Устанавливаем значения по умолчания
@@ -34,11 +36,29 @@ public class PdfConfig {
         this.fontSize = 10f;
         this.headerOnEachPage = false;
         this.pageNumeration = true;
+        this.numbersColumn = false;
+        this.autoPageSize = false;
         try {
             this.font = PdfFontFactory.createFont(FONT_FILENAME, PdfEncodings.IDENTITY_H);
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public PdfConfig(String lang, String outputFileName, PageSize pageSize, PdfFont font,
+                     Orientation orientation, String header, float fontSize, boolean headerOnEachPage,
+                     boolean pageNumeration, boolean numbersColumn, boolean autoPageSize) {
+        this.lang = lang;
+        this.outputFileName = outputFileName;
+        this.pageSize = pageSize;
+        this.font = font;
+        this.orientation = orientation;
+        this.header = header;
+        this.fontSize = fontSize;
+        this.headerOnEachPage = headerOnEachPage;
+        this.pageNumeration = pageNumeration;
+        this.numbersColumn = numbersColumn;
+        this.autoPageSize = autoPageSize;
     }
 
     public String getLang() {
@@ -119,6 +139,24 @@ public class PdfConfig {
 
     public PdfConfig setPageNumeration(boolean pageNumeration) {
         this.pageNumeration = pageNumeration;
+        return this;
+    }
+
+    public boolean isNumbersColumn() {
+        return numbersColumn;
+    }
+
+    public PdfConfig setNumbersColumn(boolean numbersColumn) {
+        this.numbersColumn = numbersColumn;
+        return this;
+    }
+
+    public boolean isAutoPageSize() {
+        return autoPageSize;
+    }
+
+    public PdfConfig setAutoPageSize(boolean autoPageSize) {
+        this.autoPageSize = autoPageSize;
         return this;
     }
 
