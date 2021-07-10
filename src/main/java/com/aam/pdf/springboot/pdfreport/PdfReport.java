@@ -48,7 +48,7 @@ public class PdfReport implements Report {
 
     /**
      * Конструктор класса
-     * @param config - задает конфигурацию pdf файла
+     * @param config задает конфигурацию pdf файла
      */
     public PdfReport(PdfConfig config) {
         this.config = config;
@@ -56,12 +56,12 @@ public class PdfReport implements Report {
 
     /**
      * Метод для начала построения отчета
-     * @param headers - список заголовков таблицы
-     * @param batch - пакет значений таблицы
+     * @param headers список заголовков таблицы
+     * @param batch пакет значений таблицы
      * @throws FileNotFoundException
      */
     @Override
-    public void createReport(ArrayList<String> headers, ArrayList<ArrayList<String>> batch) throws FileNotFoundException {
+    public void createReport(ArrayList<String> headers, ArrayList<ArrayList<String>> batch) {
         // Проверка параметров на null
         if (headers == null || batch == null) {
             throw new NullPointerException();
@@ -81,7 +81,7 @@ public class PdfReport implements Report {
 
     /**
      * Метод, который добавляется очередной пакет в общую матрицу данных для конечного построения отчета
-     * @param batch - пакет значений таблицы
+     * @param batch пакет значений таблицы
      */
     private void addBatchToData(ArrayList<ArrayList<String>> batch) {
         // Цикл по всем строкам пакета
@@ -105,10 +105,15 @@ public class PdfReport implements Report {
      * Метод создает файл для отчета с параметрами, заданными в конфигурации
      * @throws FileNotFoundException
      */
-    private void createDocument() throws FileNotFoundException {
+    private void createDocument() {
         // Создаем файл для отчета
         File file = new File("./reports/" + config.getOutputFileName());
-        PdfWriter pdfWriter = new PdfWriter(file);
+        PdfWriter pdfWriter = null;
+        try {
+            pdfWriter = new PdfWriter(file);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
         PdfDocument pdfDocument = new PdfDocument(pdfWriter);
 
         this.document = new Document(pdfDocument, config.getPageSize());
@@ -196,7 +201,7 @@ public class PdfReport implements Report {
 
     /**
      * Метод, который добавляет в таблицу отчета еще один пакет значений
-     * @param batch -пакет значений таблицы
+     * @param batch пакет значений таблицы
      */
     @Override
     public void addBatch(ArrayList<ArrayList<String>> batch) {
@@ -214,18 +219,22 @@ public class PdfReport implements Report {
      * Метод, который окончательно формуирет отчет и отдает пользователю
      */
     @Override
-    public void getReport() throws FileNotFoundException {
+    public void getReport() {
         if (this.columnCount > 0) {
             // Создаем таблицы
             ArrayList<Table> tableArr = this.createTable();
             // Создаем документ
             this.createDocument();
+
             // Добавляем таблицы в документ
             for (Table table : tableArr) {
                 this.document.add(table);
                 this.document.add(new Paragraph("").setFontSize(10));
             }
         } else {
+            // Учитываем заданный размер и ориентацию
+            this.calculatePageSize();
+            // Создаем документ
             this.createDocument();
         }
         // Закрываем документ
@@ -234,7 +243,7 @@ public class PdfReport implements Report {
 
     /**
      * Метод для создания окончательной таблицы в pdf файле по заголовкам и данным
-     * @return - таблица для отчета
+     * @return таблица для отчета
      */
     private ArrayList<Table> createTable() {
 
@@ -302,7 +311,7 @@ public class PdfReport implements Report {
     /**
      * Метод, который считает по размеру страницы, по размеру шрифта
      * и по самым длинным словам в колонкам число таблиц и колонок
-     * @param longestWords - массив саммых длинных слов в каждой колонке
+     * @param longestWords массив саммых длинных слов в каждой колонке
      */
     private void calculateNumberTablesAndColumns(ArrayList<String> longestWords) {
         // Находим размеры страницы
@@ -377,7 +386,7 @@ public class PdfReport implements Report {
 
     /**
      * Метод для поиск самого длинного слова в каждой колонке
-     * @return - массив самых длинных слов каждой колонки
+     * @return массив самых длинных слов каждой колонки
      */
     private ArrayList<String> longestWordEachColumn() {
         ArrayList<String> result = new ArrayList<String>(this.columnCount);
@@ -401,8 +410,8 @@ public class PdfReport implements Report {
 
     /**
      * Метод для поиска саамых длинных слов в строке
-     * @param s - входная строка
-     * @return - самое длинное слово
+     * @param s входная строка
+     * @return самое длинное слово
      */
     private String longestWord(String s) {
         return Arrays.stream(s.split(" ")).max(Comparator.comparingInt(String::length)).orElse("");

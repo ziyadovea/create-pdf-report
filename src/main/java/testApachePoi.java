@@ -30,7 +30,7 @@ public class testApachePoi {
 
             Font font = book.createFont();
             font.setFontHeightInPoints((short)24);
-            font.setFontName("Courier New");
+            font.setFontName("Courier ghfgh");
             font.setItalic(true);
 
             style.setFont(font);
@@ -47,7 +47,7 @@ public class testApachePoi {
         // имя будет String, а дата рождения --- Date,
         // формата dd.mm.yyyy
         Cell name = row.createCell(0);
-        name.setCellValue("Джон\nJonh");
+        name.setCellValue("Заголовок. Header.");
 
         CellStyle cs = book.createCellStyle();
         cs.setWrapText(true);
