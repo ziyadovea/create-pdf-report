@@ -5,23 +5,35 @@ package com.aam.pdf.springboot.excelreport;
  */
 public class ExcelConfig {
 
+    private String outputDirectory;
     private String outputFileName;
     private String header;
     private String fontName;
     private float fontSize;
 
     public ExcelConfig() {
+        this.outputDirectory = "tmp_reports";
         this.outputFileName = "report.xlsx";
         this.header = null;
         this.fontName = "Times New Roman";
         this.fontSize = 12;
     }
 
-    public ExcelConfig(String outputFileName, String header, String fontName, float fontSize) {
+    public ExcelConfig(String outputDirectory, String outputFileName, String header, String fontName, float fontSize) {
+        this.outputDirectory = outputDirectory;
         this.outputFileName = outputFileName;
         this.header = header;
         this.fontName = fontName;
         this.fontSize = fontSize;
+    }
+
+    public String getOutputDirectory() {
+        return outputDirectory;
+    }
+
+    public ExcelConfig setOutputDirectory(String outputDirectory) {
+        this.outputDirectory = outputDirectory;
+        return this;
     }
 
     public String getOutputFileName() {
@@ -59,4 +71,5 @@ public class ExcelConfig {
         this.fontSize = fontSize;
         return this;
     }
+
 }

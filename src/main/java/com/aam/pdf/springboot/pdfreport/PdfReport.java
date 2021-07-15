@@ -107,7 +107,7 @@ public class PdfReport implements Report {
      */
     private void createDocument() {
         // Создаем файл для отчета
-        File file = new File("./reports/" + config.getOutputFileName());
+        File file = new File("./" + config.getOutputDirectory() + "/" + config.getOutputFileName());
         PdfWriter pdfWriter = null;
         try {
             pdfWriter = new PdfWriter(file);

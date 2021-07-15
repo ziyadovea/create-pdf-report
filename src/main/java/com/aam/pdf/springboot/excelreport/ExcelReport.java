@@ -33,7 +33,6 @@ public class ExcelReport implements Report {
      * Метод для начала построения отчета
      * @param headers массив заголовков
      * @param batch первая пачка данных
-     * @throws FileNotFoundException
      */
     @Override
     public void createReport(ArrayList<String> headers, ArrayList<ArrayList<String>> batch) {
@@ -206,17 +205,14 @@ public class ExcelReport implements Report {
 
     /**
      * Метод отдает построенный отчет
-     * @throws FileNotFoundException
      */
     @Override
     public void getReport() {
         // Создаем эксель-книгу
         Workbook wb = new XSSFWorkbook();
         this.createTable(wb);
-        try (OutputStream fileOut = new FileOutputStream("./reports/" +
-                (config.getOutputFileName() == null ?
-                "report.xlsx"
-                : config.getOutputFileName()))) {
+        try (OutputStream fileOut = new FileOutputStream("./" + config.getOutputDirectory() +
+                "/" + config.getOutputFileName())) {
             // Записывам все в файл
             wb.write(fileOut);
             wb.close();

@@ -15,6 +15,7 @@ class ExcelReportTest {
     @Test
     void test1() {
         ExcelReport report = new ExcelReport(new ExcelConfig()
+                .setOutputDirectory("reports")
                 .setOutputFileName("test1.xlsx")
         );
         ArrayList<String> headers = new ArrayList<>();
@@ -29,6 +30,7 @@ class ExcelReportTest {
     @Test
     void test2() {
         ExcelReport report = new ExcelReport(new ExcelConfig()
+                .setOutputDirectory("reports")
                 .setOutputFileName("test2.xlsx")
                 .setHeader("Заголовок. Header.")
         );
@@ -44,6 +46,7 @@ class ExcelReportTest {
     @Test
     void test3() {
         ExcelReport report = new ExcelReport(new ExcelConfig()
+                .setOutputDirectory("reports")
                 .setOutputFileName("test3.xlsx")
                 .setHeader("Сравнительная характеристика языков программирования.")
         );
@@ -242,6 +245,7 @@ class ExcelReportTest {
     @Test
     void test4() {
         ExcelReport report = new ExcelReport(new ExcelConfig()
+                .setOutputDirectory("reports")
                 .setOutputFileName("test4.xlsx")
                 .setFontSize(40)
         );

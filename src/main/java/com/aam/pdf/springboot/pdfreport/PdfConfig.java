@@ -1,5 +1,6 @@
 package com.aam.pdf.springboot.pdfreport;
 
+import com.aam.pdf.springboot.excelreport.ExcelConfig;
 import com.itextpdf.io.font.PdfEncodings;
 import com.itextpdf.kernel.font.PdfFont;
 import com.itextpdf.kernel.font.PdfFontFactory;
@@ -15,6 +16,7 @@ public class PdfConfig {
     private final String FONT_FILENAME = "ARIALUNI.TTF";
 
     private String lang;
+    private String outputDirectory;
     private String outputFileName;
     private PageSize pageSize;
     private PdfFont font;
@@ -29,6 +31,7 @@ public class PdfConfig {
     public PdfConfig() {
         // Устанавливаем значения по умолчания
         this.lang = null;
+        this.outputDirectory = "tmp_reports";
         this.outputFileName = "report.pdf";
         this.pageSize = PageSize.A4;
         this.orientation = Orientation.PORTRAIT;
@@ -45,10 +48,11 @@ public class PdfConfig {
         }
     }
 
-    public PdfConfig(String lang, String outputFileName, PageSize pageSize, PdfFont font,
-                     Orientation orientation, String header, float fontSize, boolean headerOnEachPage,
+    public PdfConfig(String lang, String outputDirectory, String outputFileName, PageSize pageSize,
+                     PdfFont font, Orientation orientation, String header, float fontSize, boolean headerOnEachPage,
                      boolean pageNumeration, boolean numbersColumn, boolean autoPageSize) {
         this.lang = lang;
+        this.outputDirectory = outputDirectory;
         this.outputFileName = outputFileName;
         this.pageSize = pageSize;
         this.font = font;
@@ -67,6 +71,15 @@ public class PdfConfig {
 
     public PdfConfig setLang(String lang) {
         this.lang = lang;
+        return this;
+    }
+
+    public String getOutputDirectory() {
+        return outputDirectory;
+    }
+
+    public PdfConfig setOutputDirectory(String outputDirectory) {
+        this.outputDirectory = outputDirectory;
         return this;
     }
 

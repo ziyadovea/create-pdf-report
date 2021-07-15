@@ -22,6 +22,7 @@ class PdfReportTest {
     @Test
     void test1() throws FileNotFoundException {
         PdfReport report = new PdfReport(new PdfConfig()
+                .setOutputDirectory("reports")
                 .setOutputFileName("test1.pdf")
                 .setPageNumeration(false)
         );
@@ -39,6 +40,7 @@ class PdfReportTest {
     @Test
     void test2() throws FileNotFoundException {
         PdfReport report = new PdfReport(new PdfConfig()
+                .setOutputDirectory("reports")
                 .setOutputFileName("test2.pdf")
                 .setHeader("Заголовок")
                 .setHeaderOnEachPage(false)
@@ -62,6 +64,7 @@ class PdfReportTest {
     @Test
     void test3() throws FileNotFoundException {
         PdfReport report = new PdfReport(new PdfConfig()
+                .setOutputDirectory("reports")
                 .setOutputFileName("test3.pdf")
                 .setHeaderOnEachPage(true)
                 .setPageNumeration(true)
@@ -80,6 +83,7 @@ class PdfReportTest {
     @Test
     void test4() throws FileNotFoundException {
         PdfReport report = new PdfReport(new PdfConfig()
+                .setOutputDirectory("reports")
                 .setOutputFileName("test4.pdf")
                 .setHeader("Главный заголовок")
                 .setHeaderOnEachPage(true)
@@ -101,6 +105,7 @@ class PdfReportTest {
     @Test
     void test5() throws FileNotFoundException {
         PdfReport report = new PdfReport(new PdfConfig()
+                .setOutputDirectory("reports")
                 .setOutputFileName("test5.pdf")
                 .setHeader("Главный заголовок")
                 .setHeaderOnEachPage(true)
@@ -125,6 +130,7 @@ class PdfReportTest {
     @Test
     void test6() throws FileNotFoundException {
         PdfReport report = new PdfReport(new PdfConfig()
+                .setOutputDirectory("reports")
                 .setOutputFileName("test6.pdf")
                 .setHeaderOnEachPage(false)
                 .setPageNumeration(false)
@@ -146,6 +152,7 @@ class PdfReportTest {
     @Test
     void test7() throws FileNotFoundException {
         PdfReport report = new PdfReport(new PdfConfig()
+                .setOutputDirectory("reports")
                 .setOutputFileName("test7.pdf")
                 .setHeaderOnEachPage(false)
                 .setPageNumeration(false)
@@ -174,6 +181,7 @@ class PdfReportTest {
     @Test
     void test8() throws FileNotFoundException {
         PdfReport report = new PdfReport(new PdfConfig()
+                .setOutputDirectory("reports")
                 .setOutputFileName("test8.pdf")
                 .setHeader("Основные сведения об отчетах в Access.")
                 .setHeaderOnEachPage(true)
@@ -244,6 +252,7 @@ class PdfReportTest {
     @Test
     void test9() throws FileNotFoundException {
         PdfReport report = new PdfReport(new PdfConfig()
+                .setOutputDirectory("reports")
                 .setOutputFileName("test9.pdf")
                 .setHeader("Основные сведения об отчетах в Access.")
                 .setHeaderOnEachPage(true)
@@ -314,6 +323,7 @@ class PdfReportTest {
     @Test
     void test10() throws FileNotFoundException {
         PdfReport report = new PdfReport(new PdfConfig()
+                .setOutputDirectory("reports")
                 .setOutputFileName("test10.pdf")
                 .setHeader("Основные сведения об отчетах в Access")
                 .setHeaderOnEachPage(true)
@@ -382,6 +392,7 @@ class PdfReportTest {
     @Test
     void test11() throws FileNotFoundException {
         PdfReport report = new PdfReport(new PdfConfig()
+                .setOutputDirectory("reports")
                 .setOutputFileName("test11.pdf")
                 .setHeader("Сравнительная характеристика языков программирования.")
                 .setHeaderOnEachPage(true)
@@ -582,6 +593,7 @@ class PdfReportTest {
     @Test
     void test12() throws FileNotFoundException {
         PdfReport report = new PdfReport(new PdfConfig()
+                .setOutputDirectory("reports")
                 .setOutputFileName("test12.pdf")
                 .setHeader("Сравнительная характеристика языков программирования.")
                 .setHeaderOnEachPage(true)
@@ -783,6 +795,7 @@ class PdfReportTest {
     @Test
     void test13() throws FileNotFoundException {
         PdfReport report = new PdfReport(new PdfConfig()
+                .setOutputDirectory("reports")
                 .setOutputFileName("test13.pdf")
                 .setHeader("Главный заголовок")
                 .setHeaderOnEachPage(true)
