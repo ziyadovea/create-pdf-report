@@ -8,12 +8,14 @@ import com.aam.pdf.springboot.pdfreport.PdfReport;
 import com.aam.pdf.springboot.report.Report;
 import com.aam.pdf.springboot.reportconfig.ReportConfig;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Future;
 
 /**
  * Класс, который будет отвечать за создание отчетов и выдачу их клиентам
@@ -26,13 +28,13 @@ public class DataManager {
     private int id; // уникальный id отчета
 
     @Async
-    public int buildReport(ReportConfig reportConfig) {
+    public Future<Integer> buildReport(ReportConfig reportConfig) {
         id++;
         DataProducer dataProducer = new DataProducer(reportConfig.getDataBaseQuery());
         // есть заголовки => есть содержимое отчета
         if (dataProducer.getHeaders() != null) {
             if (reportConfig.isBuildPdf()) {
-                // здесь я создаю новый пдф конфиг, но мне кажется было бы логичном
+                // здесь я создаю новый пдф конфиг, но мне кажется было бы логичным
                 // в глобальном конфиге reportConfig иметь поле конфиг для определенного формата
                 // типа reportConfig.getPdfConfig() или reportConfig.getExcelConfig()
                 PdfConfig pdfConfig = new PdfConfig();
@@ -75,11 +77,12 @@ public class DataManager {
                 reportAndPath.put(report, "./" + excelConfig.getOutputDirectory() + "/" + excelConfig.getOutputFileName());
             }
         }
-        return id;
+        return new AsyncResult<Integer>(id);
+        // в RestController после возврата этого метода с помощью PostMapping надо уведомить пользователя, что отчет готов?
     }
 
     @Async
-    public Report getReport(int id) {
+    public Future<Report> getReport(int id) {
     // здесь я думаю логику надо сменить: в RestController, который будет оперировать данным классом,
     // отдается отчет клиенту, а потом удаляется
         if (idAndReports.containsKey(id)) {
@@ -88,7 +91,7 @@ public class DataManager {
             file.delete();
             reportAndPath.remove(idAndReports.remove(id));
             idAndReports.remove(id);
-            return result;
+            return new AsyncResult<Report>(result);
         } else {
             throw new IllegalArgumentException("Отчета с таким идентификатором нет!");
         }

@@ -13,8 +13,8 @@ import org.springframework.stereotype.Service;
 @NoArgsConstructor
 public class ReportConfig {
 
-    @Getter @Setter private boolean buildPdf = true;
-    @Getter @Setter private boolean buildExcel = false;
-    @Getter @Setter private String dataBaseQuery;
+    private @Getter @Setter boolean buildPdf = true;
+    private @Getter @Setter boolean buildExcel = false;
+    private @Getter @Setter String dataBaseQuery;
 
 }
