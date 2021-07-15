@@ -80,12 +80,14 @@ public class DataManager {
 
     @Async
     public Report getReport(int id) {
-    // здесь я думаю логику надо сменить: в коде, который оперирует данным классом, вызывается этот метод
-    // ему возвращается отчет, отчет отдается на скачивание, скачивается, а уже потом удаляется
+    // здесь я думаю логику надо сменить: в RestController, который будет оперировать данным классом,
+    // отдается отчет клиенту, а потом удаляется
         if (idAndReports.containsKey(id)) {
             var result = idAndReports.get(id);
             File file = new File(reportAndPath.get(result));
             file.delete();
+            reportAndPath.remove(idAndReports.remove(id));
+            idAndReports.remove(id);
             return result;
         } else {
             throw new IllegalArgumentException("Отчета с таким идентификатором нет!");
